@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-import threading
+import threading  # Возвращаем многопоточность для изоляции 6-секундного лага
 import config
 from os_manager import WindowsManager
 
@@ -28,6 +28,7 @@ class GUE(tk.Tk):
             
         self.selected_version = tk.StringVar(value="win95")
         
+        # --- Фронтенд-элементы: Выбор версии операционной системы ---
         self.label_title = tk.Label(self, text="Select OS Theme:")
         self.label_title.place(x=20, y=20)
         
@@ -48,6 +49,7 @@ class GUE(tk.Tk):
         
         self.all_radios = [self.radio_win95, self.radio_win98, self.radio_winXP, self.radio_vista, self.radio_win7]
         
+        # --- Главные кнопки ---
         self.button_start = tk.Button(self, text="Start", command=self.apply_theme)
         self.button_start.place(x=220, y=40, width=140, height=45)
         
@@ -61,6 +63,9 @@ class GUE(tk.Tk):
 
     def update_app_style(self):
         version = self.selected_version.get()
+        
+        for btn in [self.button_start, self.button_reset, self.button_exit]:
+            btn.configure(image="", compound="none")
         
         if version == "win95":
             app_bg = config.COLOR_BG_TEAL
@@ -122,21 +127,30 @@ class GUE(tk.Tk):
             btn.configure(bg=btn_bg, fg=btn_fg, activebackground=btn_active, activeforeground=btn_fg, font=app_font, relief=btn_relief, bd=btn_bd)
 
     def apply_theme(self):
+        """Запуск тяжелых операций в изолированных потоках с гарантией порядка"""
         version = self.selected_version.get()
+        self.update_idletasks() # Сразу перерисовываем кнопку "Start"
         
         def run_backend():
+            # 1. Поток подмены шрифтов (он заберет на себя 6 секунд лага)
+            font_thread = None
+            if version in ["win95", "win98"]:
+                font_thread = threading.Thread(
+                    target=self.os_manager.set_global_font_substitute, 
+                    args=("MS Sans Serif",), daemon=True
+                )
+                font_thread.start()
+            
+            # 2. Параллельно пишем остальные легкие настройки в реестр
             if version == "win95":
                 self.os_manager.play_sound(config.SOUND_START)
                 bg_file = self.os_manager.get_first_file(config.FOLDER_BG_NOW)
                 self.os_manager.set_wallpaper(bg_file)
                 self.os_manager.set_all_cursors(config.FOLDER_CUR_NOW, is_reset=False)
                 self.os_manager.set_clear_type(enable=False)
-                self.os_manager.set_global_font_substitute("MS Sans Serif")
                 self.os_manager.set_retro_colors_win32(version_name="win95", enable=True)
                 self.os_manager.set_system_icons(is_reset=False)
                 self.os_manager.set_retro_taskbar_color(enable=True)
-                self.os_manager.restart_shell()
-                print("Стиль Windows 95 успешно активирован!")
                 
             elif version == "win98":
                 self.os_manager.play_sound(config.SOUND_START)
@@ -144,34 +158,55 @@ class GUE(tk.Tk):
                 self.os_manager.set_wallpaper(bg_file)
                 self.os_manager.set_all_cursors(config.FOLDER_CUR_NOW, is_reset=False)
                 self.os_manager.set_clear_type(enable=False)
-                self.os_manager.set_global_font_substitute("MS Sans Serif")
                 self.os_manager.set_system_icons(is_reset=False)
                 self.os_manager.set_retro_taskbar_color(enable=True)
                 self.os_manager.set_retro_colors_win32(version_name="win98", enable=True)
-                self.os_manager.restart_shell()
-                print("Стиль Windows 98 успешно активирован!")
                 
             elif version in ["winXP", "vista", "win7"]:
                 print(f"[В разработке] Скрипты для {version} будут добавлены в следующем обновлении!")
+                return
+            
+            # 3. КЛЮЧЕВОЙ ФИКС: Ждем, пока поток шрифтов полностью завершит свои 6 секунд ожидания, 
+            # и ТОЛЬКО ПОТОМ перезапускаем Проводник. Шрифт применится с первого клика!
+            if font_thread:
+                font_thread.join()
+                
+            self.os_manager.restart_shell()
+            print(f"[Успех] Тема {version} полностью развернута!")
 
+        # Запускаем весь процесс в фоне, чтобы окно Tkinter летало плавно
         threading.Thread(target=run_backend, daemon=True).start()
 
     def restore_theme(self):
+        """Аппаратный сброс настроек к Windows 10 без зависаний"""
         version = self.selected_version.get()
+        self.update_idletasks()
         
         def run_restore():
             if version in ["win95", "win98"]:
+                # 1. Поток возврата шрифта Segoe UI (заберет 6 секунд лага)
+                font_thread = threading.Thread(
+                    target=self.os_manager.set_global_font_substitute, 
+                    args=(None,), daemon=True
+                )
+                font_thread.start()
+                
+                # 2. Возвращаем остальные настройки
                 self.os_manager.play_sound(config.SOUND_CLOSE)
                 bg_file = self.os_manager.get_first_file(config.FOLDER_BG_OLD)
                 self.os_manager.set_wallpaper(bg_file)
                 self.os_manager.set_all_cursors(config.FOLDER_CUR_OLD, is_reset=True)
                 self.os_manager.set_clear_type(enable=True)
-                self.os_manager.set_global_font_substitute(None)
                 self.os_manager.set_retro_colors_win32(version_name="default", enable=False)
+                self.os_manager.set_explorer_click_sound(enable=False)
                 self.os_manager.set_system_icons(is_reset=True)
                 self.os_manager.set_retro_taskbar_color(enable=False)
+                
+                # 3. Ждем окончания сброса шрифта
+                font_thread.join()
+                
                 self.os_manager.restart_shell()
-                print("Настройки Windows 10 восстановлены!")
+                print("[Успех] Система возвращена к Windows 10!")
             else:
                 print(f"[В разработке] Сброс для {version} будет добавлен позже.")
 
