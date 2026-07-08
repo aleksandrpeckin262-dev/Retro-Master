@@ -176,3 +176,4 @@ class WindowsManager:
             print("Оболочка и кэш Рабочего стола успешно обновлены!")
         except Exception as e:
             print(f"Ошибка перезапуска оболочки: {e}")
+
