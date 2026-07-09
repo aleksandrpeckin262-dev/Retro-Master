@@ -12,6 +12,9 @@ FONT_INTERFACE = ("Arial", 13)
 ICON_PATH = r'D:\old master\icon.ico'
 BASE_DIR = os.getcwd()
 
+# Путь к картинке градиента для GUI Windows XP
+PATH_IMAGE_XP = os.path.join(BASE_DIR, "bg_xp.png")
+
 FOLDER_BG_NOW = os.path.join(BASE_DIR, "bacground_now")
 FOLDER_BG_OLD = os.path.join(BASE_DIR, "bacground_old")
 FOLDER_CUR_NOW = os.path.join(BASE_DIR, "cursor_now")
@@ -25,13 +28,7 @@ SOUND_START = "win95_start.wav"
 SOUND_CLOSE = "win95_close.wav"
 
 # --- Список системных курсоров для полной замены ---
-CURSOR_NAMES = [
-    "Arrow",       # Основной указатель
-    "Help",        # Выбор справки
-    "AppStarting", # Фоновый режим
-    "Wait",        # Система недоступна
-    "IBeam"        # Выделение текста
-]
+CURSOR_NAMES = ["Arrow", "Help", "AppStarting", "Wait", "IBeam"]
 
 # --- Команды для быстрой перезагрузки оболочки Windows ---
 CMD_KILL_EXPLORER = "taskkill /f /im explorer.exe"
@@ -41,10 +38,7 @@ CMD_START_EXPLORER = "start explorer"
 SPI_SETDESKWALLPAPER = 20
 SPI_SETCURSORS = 87
 SPI_SETFONTSMOOTHING = 0x004B
-
-SPIF_UPDATEINIFILE = 0x01
-SPIF_SENDCHANGE = 0x02
-SPI_FLAGS_IMMEDIATE = SPIF_UPDATEINIFILE | SPIF_SENDCHANGE
+SPI_FLAGS_IMMEDIATE = 0x01 | 0x02
 
 SMOOTHING_OFF_VAL = "0"
 SMOOTHING_OFF_TYPE = 0
