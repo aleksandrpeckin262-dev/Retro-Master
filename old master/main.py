@@ -1,215 +1,96 @@
-import os
-import tkinter as tk
-import threading  # Возвращаем многопоточность для изоляции 6-секундного лага
-import config
+import os, tkinter as tk, threading, config
 from os_manager import WindowsManager
 
 class GUE(tk.Tk):
     def __init__(self):
         super().__init__()
         self.os_manager = WindowsManager()
-        
         self.title(config.WINDOW_TITLE)
         self.geometry(config.WINDOW_GEOMETRY)
         self.resizable(False, False)
         
-        if os.path.exists(config.ICON_PATH):
-            self.iconbitmap(config.ICON_PATH)
-            
-        required_folders = [
-            config.FOLDER_BG_NOW, config.FOLDER_BG_OLD, 
-            config.FOLDER_CUR_NOW, config.FOLDER_CUR_OLD, 
-            config.FOLDER_SOUNDS_NOW, config.FOLDER_ICO_NOW, 
-            config.FOLDER_ICO_OLD
-        ]
-        for folder_path in required_folders:
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
+        if os.path.exists(config.ICON_PATH): self.iconbitmap(config.ICON_PATH)
+        for p in [config.FOLDER_BG_NOW, config.FOLDER_BG_OLD, config.FOLDER_CUR_NOW, config.FOLDER_CUR_OLD, config.FOLDER_SOUNDS_NOW, config.FOLDER_ICO_NOW, config.FOLDER_ICO_OLD]:
+            if not os.path.exists(p): os.makedirs(p)
             
         self.selected_version = tk.StringVar(value="win95")
         
-        # --- Фронтенд-элементы: Выбор версии операционной системы ---
         self.label_title = tk.Label(self, text="Select OS Theme:")
         self.label_title.place(x=20, y=20)
         
-        self.radio_win95 = tk.Radiobutton(self, text="Windows 95", variable=self.selected_version, value="win95", command=self.update_app_style)
-        self.radio_win95.place(x=20, y=50)
+        versions = [("Windows 95", "win95", 50), ("Windows 98", "win98", 80), ("Windows XP", "winXP", 110), ("Windows Vista", "vista", 140), ("Windows 7", "win7", 170)]
+        for t, v, y in versions:
+            rb = tk.Radiobutton(self, text=t, variable=self.selected_version, value=v, command=self.update_app_style)
+            rb.place(x=20, y=y)
+        self.all_radios = [w for w in self.winfo_children() if isinstance(w, tk.Radiobutton)]
         
-        self.radio_win98 = tk.Radiobutton(self, text="Windows 98", variable=self.selected_version, value="win98", command=self.update_app_style)
-        self.radio_win98.place(x=20, y=80)
-        
-        self.radio_winXP = tk.Radiobutton(self, text="Windows XP", variable=self.selected_version, value="winXP", command=self.update_app_style)
-        self.radio_winXP.place(x=20, y=110)
-        
-        self.radio_vista = tk.Radiobutton(self, text="Windows Vista", variable=self.selected_version, value="vista", command=self.update_app_style)
-        self.radio_vista.place(x=20, y=140)
-        
-        self.radio_win7 = tk.Radiobutton(self, text="Windows 7", variable=self.selected_version, value="win7", command=self.update_app_style)
-        self.radio_win7.place(x=20, y=170)
-        
-        self.all_radios = [self.radio_win95, self.radio_win98, self.radio_winXP, self.radio_vista, self.radio_win7]
-        
-        # --- Главные кнопки ---
-        self.button_start = tk.Button(self, text="Start", command=self.apply_theme)
-        self.button_start.place(x=220, y=40, width=140, height=45)
-        
-        self.button_reset = tk.Button(self, text="Reset", command=self.restore_theme)
-        self.button_reset.place(x=220, y=110, width=140, height=45)
-        
-        self.button_exit = tk.Button(self, text="Exit", command=self.destroy)
-        self.button_exit.place(x=220, y=180, width=140, height=45)
+        tk.Button(self, text="Start", command=self.apply_theme).place(x=220, y=40, width=140, height=45)
+        tk.Button(self, text="Reset", command=self.restore_theme).place(x=220, y=110, width=140, height=45)
+        tk.Button(self, text="Exit", command=self.destroy).place(x=220, y=180, width=140, height=45)
+        self.all_btns = [w for w in self.winfo_children() if isinstance(w, tk.Button)]
         
         self.update_app_style()
 
     def update_app_style(self):
-        version = self.selected_version.get()
+        """Мгновенно перекрашивает форму приложения под выбранную эпоху Windows"""
+        v = self.selected_version.get()
+        for b in self.all_btns: b.configure(image="", compound="none")
         
-        for btn in [self.button_start, self.button_reset, self.button_exit]:
-            btn.configure(image="", compound="none")
-        
-        if version == "win95":
-            app_bg = config.COLOR_BG_TEAL
-            btn_bg = "#D4D0C8"            
-            btn_active = "#B0B0B0"
-            btn_fg = "#000000"            
-            app_font = ("MS Sans Serif", 11)
-            text_color = "#FFFFFF"
-            btn_relief = "raised"         
-            btn_bd = 3
+        if v == "win95": app_bg, btn_bg, btn_act, btn_fg, font, text_c, relief, bd = config.COLOR_BG_TEAL, "#D4D0C8", "#B0B0B0", "#000000", ("MS Sans Serif", 11), "#FFFFFF", "raised", 3
+        elif v == "win98": app_bg, btn_bg, btn_act, btn_fg, font, text_c, relief, bd = "#007070", "#D4D0C8", "#B0B0B0", "#000000", ("MS Sans Serif", 11), "#FFFFFF", "raised", 2
+        elif v == "winXP": app_bg, btn_bg, btn_act, btn_fg, font, text_c, relief, bd = "#245DD7", "#5B9BD5", "#41719C", "#FFFFFF", ("Tahoma", 11), "#FFFFFF", "flat", 1
+        elif v == "vista": app_bg, btn_bg, btn_act, btn_fg, font, text_c, relief, bd = "#202020", "#0078D7", "#005A9E", "#FFFFFF", ("Segoe UI", 11), "#FFFFFF", "flat", 0
+        elif v == "win7": app_bg, btn_bg, btn_act, btn_fg, font, text_c, relief, bd = "#0354AD", "#11B7EB", "#0E96C2", "#000000", ("Segoe UI", 11), "#FFFFFF", "raised", 1
             
-        elif version == "win98":
-            app_bg = "#007070"
-            btn_bg = "#D4D0C8"            
-            btn_active = "#B0B0B0"
-            btn_fg = "#000000"            
-            app_font = ("MS Sans Serif", 11)
-            text_color = "#FFFFFF"
-            btn_relief = "raised"         
-            btn_bd = 2 
-            
-        elif version == "winXP":
-            app_bg = "#245DD7"            
-            btn_bg = "#5B9BD5"            
-            btn_active = "#41719C"
-            btn_fg = "#FFFFFF"            
-            app_font = ("Tahoma", 11)     
-            text_color = "#FFFFFF"
-            btn_relief = "flat"           
-            btn_bd = 1
-            
-        elif version == "vista":
-            app_bg = "#202020"            
-            btn_bg = "#0078D7"          
-            btn_active = "#005A9E"
-            btn_fg = "#FFFFFF"
-            app_font = ("Segoe UI", 11) 
-            text_color = "#FFFFFF"
-            btn_relief = "flat"           
-            btn_bd = 0
-            
-        elif version == "win7":
-            app_bg = "#0354AD"
-            btn_bg = "#11B7EB"            
-            btn_active = "#0E96C2"
-            btn_fg = "#000000"            
-            app_font = ("Segoe UI", 11)
-            text_color = "#FFFFFF"
-            btn_relief = "raised"         
-            btn_bd = 1
-            
+        # КРИСТАЛЬНО ЧИСТАЯ ПОКРАСКА: никаких холстов и картинок!
         self.configure(bg=app_bg)
-        self.label_title.configure(bg=app_bg, fg=text_color, font=app_font)
-        
-        for radio in self.all_radios:
-            radio.configure(bg=app_bg, fg=text_color, activebackground=app_bg, activeforeground=text_color, font=app_font)
-        
-        for btn in [self.button_start, self.button_reset, self.button_exit]:
-            btn.configure(bg=btn_bg, fg=btn_fg, activebackground=btn_active, activeforeground=btn_fg, font=app_font, relief=btn_relief, bd=btn_bd)
+        self.label_title.configure(bg=app_bg, fg=text_c, font=font)
+        for r in self.all_radios: 
+            r.configure(bd=0, highlightthickness=0, bg=app_bg, fg=text_c, activebackground=app_bg, activeforeground=text_c, font=font)
+        for b in self.all_btns: 
+            b.configure(bg=btn_bg, fg=btn_fg, activebackground=btn_act, activeforeground=btn_fg, font=font, relief=relief, bd=bd)
 
     def apply_theme(self):
-        """Запуск тяжелых операций в изолированных потоках с гарантией порядка"""
-        version = self.selected_version.get()
-        self.update_idletasks() # Сразу перерисовываем кнопку "Start"
+        v = self.selected_version.get()
+        self.update_idletasks()
         
         def run_backend():
-            # 1. Поток подмены шрифтов (он заберет на себя 6 секунд лага)
-            font_thread = None
-            if version in ["win95", "win98"]:
-                font_thread = threading.Thread(
-                    target=self.os_manager.set_global_font_substitute, 
-                    args=("MS Sans Serif",), daemon=True
-                )
-                font_thread.start()
-            
-            # 2. Параллельно пишем остальные легкие настройки в реестр
-            if version == "win95":
+            ft = None
+            if v in ["win95", "win98"]:
+                ft = threading.Thread(target=self.os_manager.set_global_font_substitute, args=("MS Sans Serif",), daemon=True)
+                ft.start()
+            if v in ["win95", "win98"]:
                 self.os_manager.play_sound(config.SOUND_START)
-                bg_file = self.os_manager.get_first_file(config.FOLDER_BG_NOW)
-                self.os_manager.set_wallpaper(bg_file)
-                self.os_manager.set_all_cursors(config.FOLDER_CUR_NOW, is_reset=False)
-                self.os_manager.set_clear_type(enable=False)
-                self.os_manager.set_retro_colors_win32(version_name="win95", enable=True)
-                self.os_manager.set_system_icons(is_reset=False)
-                self.os_manager.set_retro_taskbar_color(enable=True)
-                
-            elif version == "win98":
-                self.os_manager.play_sound(config.SOUND_START)
-                bg_file = self.os_manager.get_first_file(config.FOLDER_BG_NOW)
-                self.os_manager.set_wallpaper(bg_file)
+                self.os_manager.set_wallpaper(self.os_manager.get_first_file(config.FOLDER_BG_NOW))
                 self.os_manager.set_all_cursors(config.FOLDER_CUR_NOW, is_reset=False)
                 self.os_manager.set_clear_type(enable=False)
                 self.os_manager.set_system_icons(is_reset=False)
                 self.os_manager.set_retro_taskbar_color(enable=True)
-                self.os_manager.set_retro_colors_win32(version_name="win98", enable=True)
-                
-            elif version in ["winXP", "vista", "win7"]:
-                print(f"[В разработке] Скрипты для {version} будут добавлены в следующем обновлении!")
-                return
-            
-            # 3. КЛЮЧЕВОЙ ФИКС: Ждем, пока поток шрифтов полностью завершит свои 6 секунд ожидания, 
-            # и ТОЛЬКО ПОТОМ перезапускаем Проводник. Шрифт применится с первого клика!
-            if font_thread:
-                font_thread.join()
-                
+                self.os_manager.set_retro_colors_win32(version_name=v, enable=True)
+                if v == "win98": self.os_manager.set_explorer_click_sound(enable=True)
+            elif v in ["winXP", "vista", "win7"]:
+                print(f"[В разработке] Скрипты для {v} будут добавлены в следующем обновлении!"); return
+            if ft: ft.join()
             self.os_manager.restart_shell()
-            print(f"[Успех] Тема {version} полностью развернута!")
-
-        # Запускаем весь процесс в фоне, чтобы окно Tkinter летало плавно
+            print(f"[Успех] Тема {v} полностью развернута!")
         threading.Thread(target=run_backend, daemon=True).start()
 
     def restore_theme(self):
-        """Аппаратный сброс настроек к Windows 10 без зависаний"""
-        version = self.selected_version.get()
         self.update_idletasks()
-        
         def run_restore():
-            if version in ["win95", "win98"]:
-                # 1. Поток возврата шрифта Segoe UI (заберет 6 секунд лага)
-                font_thread = threading.Thread(
-                    target=self.os_manager.set_global_font_substitute, 
-                    args=(None,), daemon=True
-                )
-                font_thread.start()
-                
-                # 2. Возвращаем остальные настройки
-                self.os_manager.play_sound(config.SOUND_CLOSE)
-                bg_file = self.os_manager.get_first_file(config.FOLDER_BG_OLD)
-                self.os_manager.set_wallpaper(bg_file)
-                self.os_manager.set_all_cursors(config.FOLDER_CUR_OLD, is_reset=True)
-                self.os_manager.set_clear_type(enable=True)
-                self.os_manager.set_retro_colors_win32(version_name="default", enable=False)
-                self.os_manager.set_explorer_click_sound(enable=False)
-                self.os_manager.set_system_icons(is_reset=True)
-                self.os_manager.set_retro_taskbar_color(enable=False)
-                
-                # 3. Ждем окончания сброса шрифта
-                font_thread.join()
-                
-                self.os_manager.restart_shell()
-                print("[Успех] Система возвращена к Windows 10!")
-            else:
-                print(f"[В разработке] Сброс для {version} будет добавлен позже.")
-
+            ft = threading.Thread(target=self.os_manager.set_global_font_substitute, args=(None,), daemon=True)
+            ft.start()
+            self.os_manager.play_sound(config.SOUND_CLOSE)
+            self.os_manager.set_wallpaper(self.os_manager.get_first_file(config.FOLDER_BG_OLD))
+            self.os_manager.set_all_cursors(config.FOLDER_CUR_OLD, is_reset=True)
+            self.os_manager.set_clear_type(enable=True)
+            self.os_manager.set_retro_colors_win32(version_name="default", enable=False)
+            self.os_manager.set_explorer_click_sound(enable=False)
+            self.os_manager.set_system_icons(is_reset=True)
+            self.os_manager.set_retro_taskbar_color(enable=False)
+            ft.join()
+            self.os_manager.restart_shell()
+            print("[Успех] Система возвращена к Windows 10!")
         threading.Thread(target=run_restore, daemon=True).start()
 
 if __name__ == "__main__":

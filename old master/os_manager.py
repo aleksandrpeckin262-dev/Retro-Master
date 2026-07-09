@@ -16,7 +16,6 @@ class WindowsManager:
             os.makedirs(folder_path)
             return None
         files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-        # Фикс: используем .pop(0) для безопасного вытаскивания первой строки без квадратных скобок
         return os.path.abspath(os.path.join(folder_path, files.pop(0))) if files else None
 
     def get_specific_file(self, folder_name, file_name):
@@ -85,31 +84,21 @@ class WindowsManager:
 
     def set_retro_colors_win32(self, version_name="win95", enable=True):
         """Безопасно перекрашивает классические Win32 элементы через SetSysColors"""
-        # Индексы системных элементов: 15=ButtonFace, 2=ActiveCaption, 10=ActiveBorder, 5=Window, 27=GradientActiveCaption
-        elements = [15, 2, 10, 5, 27]
-        
+        elements = list((15, 2, 10, 5, 27))
         if enable:
             if version_name == "win98":
-                # Каноничный градиент Windows 98: темно-синий переходит в голубой
-                colors = [0x00D4D0C8, 0x00800000, 0x00D4D0C8, 0x00FFFFFF, 0x00A6CAF0]
+                colors = list((0x00D4D0C8, 0x00800000, 0x00D4D0C8, 0x00FFFFFF, 0x00A6CAF0))
             else:
-                # Windows 95: сплошной синий цвет (оба цвета заголовка одинаковые)
-                colors = [0x00D4D0C8, 0x00800000, 0x00D4D0C8, 0x00FFFFFF, 0x00800000]
+                colors = list((0x00D4D0C8, 0x00800000, 0x00D4D0C8, 0x00FFFFFF, 0x00800000))
         else:
-            # Дефолтные цвета Windows 10
-            colors = [0x00F0F0F0, 0x00D77800, 0x00B4B4B4, 0x00FFFFFF, 0x00D77800]
-            
+            colors = list((0x00F0F0F0, 0x00D77800, 0x00B4B4B4, 0x00FFFFFF, 0x00D77800))
         ctypes.windll.user32.SetSysColors(len(elements), (ctypes.c_int * len(elements))(*elements), (ctypes.c_uint * len(colors))(*colors))
 
     def set_retro_taskbar_color(self, enable=True):
-        """Включает серый ретро-цвет или сбрасывает его в родной черный цвет Windows 10"""
+        """Включает серый ретро-цвет или полностью очищает кэш DWM для возврата к дефолту Windows 10"""
         try:
             theme_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", 0, winreg.KEY_SET_VALUE)
-            
-            # Всегда держим SystemUsesLightTheme = 0 (Темный режим Windows 10)
-            # Это заставит панель задач становиться канонично ЧЕРНОЙ при ресете.
             winreg.SetValueEx(theme_key, "SystemUsesLightTheme", 0, winreg.REG_DWORD, 0)
-            
             if enable:
                 winreg.SetValueEx(theme_key, "ColorPrevalence", 0, winreg.REG_DWORD, 1)
             else:
@@ -118,12 +107,34 @@ class WindowsManager:
 
             dwm_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\DWM", 0, winreg.KEY_SET_VALUE)
             if enable:
-                winreg.SetValueEx(dwm_key, "AccentColor", 0, winreg.REG_DWORD, 0x00C8D0D4) # Серый (ABGR)
+                winreg.SetValueEx(dwm_key, "AccentColor", 0, winreg.REG_DWORD, 0x00C8D0D4)
                 winreg.SetValueEx(dwm_key, "AccentColorInactive", 0, winreg.REG_DWORD, 0x00C8D0D4)
+            else:
+                try:
+                    winreg.DeleteValue(dwm_key, "AccentColor")
+                    winreg.DeleteValue(dwm_key, "AccentColorInactive")
+                except FileNotFoundError: pass
             winreg.CloseKey(dwm_key)
-            print("[Ядро] Параметры цвета панели задач успешно исправлены.")
+            print("[Ядро] Параметры цвета панели задач настроены.")
         except Exception as e:
             print(f"[Ядро] Ошибка покраски панели: {e}")
+
+    def set_explorer_click_sound(self, enable=True):
+        """Включает ламповый щелчок Проводника при открытии папок для Win98 или сбрасывает его"""
+        try:
+            click_key_path = r"AppEvents\Schemes\Apps\Explorer\Navigating\.current"
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, click_key_path, 0, winreg.KEY_SET_VALUE)
+            if enable:
+                click_wav = self.get_specific_file("sounds_now", "click.wav")
+                if click_wav:
+                    winreg.SetValueEx(key, "", 0, winreg.REG_SZ, click_wav)
+                    print("[Ядро] Ретро-щелчок Проводника успешно активирован.")
+            else:
+                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, "")
+                print("[Ядро] Звук Проводника возвращен к стандарту.")
+            winreg.CloseKey(key)
+        except Exception as e:
+            print(f"[Ядро] Ошибка настройки звука Проводника: {e}")
 
     def set_system_icons(self, is_reset=False):
         """Заменяет системные иконки Рабочего стола и принудительно сбрасывает их кэш"""
@@ -162,18 +173,13 @@ class WindowsManager:
             winsound.PlaySound(wav_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
 
     def restart_shell(self):
-        """Мгновенно перезапускает Проводник и жестко очищает графический кэш Рабочего стола"""
+        """Чистый, безопасный и последовательный перезапуск Проводника Windows 10"""
         try:
-            time.sleep(0.3) # Даем Windows 300мс зафиксировать цвет хотбара в реестре DWM
+            time.sleep(0.3)
             os.system(config.CMD_KILL_EXPLORER)
-            class ANIMATIONINFO(ctypes.Structure):
-                _fields_ = [("cbSize", ctypes.c_uint), ("iMinAnimate", ctypes.c_int)]
-            anim_info = ANIMATIONINFO()
-            anim_info.cbSize = ctypes.sizeof(ANIMATIONINFO)
-            ctypes.windll.user32.SystemParametersInfoW(config.SPI_GETANIMATION, anim_info.cbSize, ctypes.byref(anim_info), 0)
-            ctypes.windll.user32.SystemParametersInfoW(config.SPI_SETANIMATION, anim_info.cbSize, ctypes.byref(anim_info), config.SPI_FLAGS_IMMEDIATE)
+            time.sleep(0.2)
             os.system(config.CMD_START_EXPLORER)
-            print("Оболочка и кэш Рабочего стола успешно обновлены!")
+            ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x1000, None, None)
+            print("[Ядро] Оболочка успешно перезапущена.")
         except Exception as e:
-            print(f"Ошибка перезапуска оболочки: {e}")
-
+            print(f"[Ядро] Ошибка перезапуска оболочки: {e}")
