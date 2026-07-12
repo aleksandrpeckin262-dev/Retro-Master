@@ -8,33 +8,69 @@ COLOR_BTN_BG = "#4FC7DB"
 COLOR_BTN_ACTIVE = "#006363"
 FONT_INTERFACE = ("Arial", 13)
 
-# --- Пути к ресурсам ---
+# --- Базовые каталоги ---
 ICON_PATH = r'D:\old master\icon.ico'
 BASE_DIR = os.getcwd()
-
-# Путь к картинке градиента для GUI Windows XP
 PATH_IMAGE_XP = os.path.join(BASE_DIR, "bg_xp.png")
 
-FOLDER_BG_NOW = os.path.join(BASE_DIR, "bacground_now")
-FOLDER_BG_OLD = os.path.join(BASE_DIR, "bacground_old")
-FOLDER_CUR_NOW = os.path.join(BASE_DIR, "cursor_now")
-FOLDER_CUR_OLD = os.path.join(BASE_DIR, "cursor_old")
-FOLDER_SOUNDS_NOW = os.path.join(BASE_DIR, "sounds_now")
-FOLDER_ICO_NOW = os.path.join(BASE_DIR, "icons_now")
-FOLDER_ICO_OLD = os.path.join(BASE_DIR, "icons_old")
+# --- БАНК ПУТЕЙ ДЛЯ ВСЕХ ВЕРСИЙ WINDOWS ---
+# Здесь прописываются прямые пути к конкретным файлам для каждой ОС
+THEME_RESOURCES = {
+    "win95": {
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_win95\win95_wallpaper.png", # Укажите ваше точное имя файла
+        "sound_start": r"D:\old master\sounds_now\start_win95.wav",
+        "icon_computer": r"D:\old master\icons_now\computer_win95.ico",
+        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_win95.ico",
+        "icon_trash_full": r"D:\old master\icons_now\trash_full_win95.ico",
+        "cursors_dir": r"D:\old master\cursor_now\win95_cur" # Папка, где лежат курсоры 95-й
+    },
+    "win98": {
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_win98\win98_wallpaper.png", # Укажите ваше точное имя файла
+        "sound_start": r"D:\old master\sounds_now\start_win98.wav",
+        "sound_click": r"D:\old master\sounds_now\click.wav",
+        "icon_computer": r"D:\old master\icons_now\computer_win98.ico",
+        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_win98.ico",
+        "icon_trash_full": r"D:\old master\icons_now\trash_full_win98.ico",
+        "cursors_dir": r"D:\old master\cursor_now\win98_cur"
+    },
+    "winXP": {
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_winXP\winXP_wallpaper.png",
+        "sound_start": r"D:\old master\sounds_now\start_winXP.wav",
+        "icon_computer": r"D:\old master\icons_now\computer_winXP.ico",
+        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_winXP.ico",
+        "icon_trash_full": r"D:\old master\icons_now\trash_full_winXP.ico",
+        "cursors_dir": r"D:\old master\cursor_now\winXP_cur"
+    },
+    "vista": {
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_winVista\vista_wallpaper.png",
+        "sound_start": r"D:\old master\sounds_now\start_vista.wav",
+        "icon_computer": r"D:\old master\icons_now\computer_vista.ico",
+        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_vista.ico",
+        "icon_trash_full": r"D:\old master\icons_now\trash_full_vista.ico",
+        "cursors_dir": r"D:\old master\cursor_now\winVista_cur"
+    },
+    "win7": {
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_win7\win7_wallpaper.png",
+        "sound_start": r"D:\old master\sounds_now\start_win7.wav",
+        "icon_computer": r"D:\old master\icons_now\computer_win7.ico",
+        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_win7.ico",
+        "icon_trash_full": r"D:\old master\icons_now\trash_full_win7.ico",
+        "cursors_dir": r"D:\old master\cursor_now\win7_cur"
+    },
+    # Пути для отката к стандартной Windows 10
+    "restore": {
+        "wallpaper": r"D:\old master\bacground_old\default_wallpaper.jpg", # Ваши старые дефолтные обои
+        "sound_close": r"D:\old master\sounds_now\close_win95.wav",
+        "cursors_old_dir": r"D:\old master\cursors_old",
+        "icons_old_dir": r"D:\old master\icons_old"
+    }
+}
 
-# --- Системные звуки ---
-SOUND_START = "win95_start.wav"
-SOUND_CLOSE = "win95_close.wav"
-
-# --- Список системных курсоров для полной замены ---
+# --- Названия курсоров и системные константы ---
 CURSOR_NAMES = ["Arrow", "Help", "AppStarting", "Wait", "IBeam"]
-
-# --- Команды для быстрой перезагрузки оболочки Windows ---
 CMD_KILL_EXPLORER = "taskkill /f /im explorer.exe"
 CMD_START_EXPLORER = "start explorer"
 
-# --- Волшебные числа Windows API (Константы) ---
 SPI_SETDESKWALLPAPER = 20
 SPI_SETCURSORS = 87
 SPI_SETFONTSMOOTHING = 0x004B
@@ -47,9 +83,6 @@ SMOOTHING_ON_TYPE = 2
 
 HWND_BROADCAST = 0xFFFF
 WM_SETTINGCHANGE = 0x001A
-SPI_GETANIMATION = 0x0048
-SPI_SETANIMATION = 0x0049
 
-# --- Системные ключи реестра для иконок ---
 REG_PATH_COMP_ICON = r"Software\Microsoft\Windows\CurrentVersion\Explorer\CLSID\{20D04FE0-3AEA-1069-A2D8-08002B30309D}\DefaultIcon"
 REG_PATH_TRASH_ICON = r"Software\Microsoft\Windows\CurrentVersion\Explorer\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\DefaultIcon"
