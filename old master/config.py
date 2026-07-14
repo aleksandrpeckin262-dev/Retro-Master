@@ -17,52 +17,52 @@ PATH_IMAGE_XP = os.path.join(BASE_DIR, "bg_xp.png")
 # Здесь прописываются прямые пути к конкретным файлам для каждой ОС
 THEME_RESOURCES = {
     "win95": {
-        "wallpaper": r"D:\old master\bacground_now\bacground_now_win95\win95_wallpaper.png", # Укажите ваше точное имя файла
-        "sound_start": r"D:\old master\sounds_now\start_win95.wav",
-        "icon_computer": r"D:\old master\icons_now\computer_win95.ico",
-        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_win95.ico",
-        "icon_trash_full": r"D:\old master\icons_now\trash_full_win95.ico",
-        "cursors_dir": r"D:\old master\cursor_now\win95_cur" # Папка, где лежат курсоры 95-й
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_win95\win95_wallpaper.png",                        # рабочий стол
+        "sound_start": r"D:\old master\sounds_now\sounds_win95\start_win95\start_win95.wav",                        # запуск win95
+        "icon_computer": r"D:\old master\icons_now\icon_win95\computer_win95\computer_win95.ico",                   # иконка ПК
+        "icon_trash_empty": r"D:\old master\icons_now\icon_win95\trash_empty_win95\trash_empty_win95.ico",          # иконка пустой корзины
+        "icon_trash_full": r"D:\old master\icons_now\icon_win95\trash_full_win95\trash_full_win95.ico",             # иконка полной корзины
+        "cursors_dir": r"D:\old master\cursor_now\win95_cur"                                                        # Папка, где лежат курсоры 95
     },
     "win98": {
-        "wallpaper": r"D:\old master\bacground_now\bacground_now_win98\win98_wallpaper.png", # Укажите ваше точное имя файла
-        "sound_start": r"D:\old master\sounds_now\start_win98.wav",
-        "sound_click": r"D:\old master\sounds_now\click.wav",
-        "icon_computer": r"D:\old master\icons_now\computer_win98.ico",
-        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_win98.ico",
-        "icon_trash_full": r"D:\old master\icons_now\trash_full_win98.ico",
-        "cursors_dir": r"D:\old master\cursor_now\win98_cur"
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_win98\win98_wallpaper.png",                        # рабочий стол
+        "sound_start": r"D:\old master\sounds_now\sounds_win98\start_win98\start_win98.wav",                        # запуск win98
+        "sound_click": r"D:\old master\sounds_now\sounds_win98\click_win98\click_win98.wav",                        # звук клика, пустышка
+        "icon_computer": r"D:\old master\icons_now\icon_win98\computer_win98\computer_win98.ico",                   # иконка ПК
+        "icon_trash_empty": r"D:\old master\icons_now\icon_win98\trash_empty_win98\trash_empty_win98.ico",          # иконка пустой корзины
+        "icon_trash_full": r"D:\old master\icons_now\icon_win98\trash_full_win98\trash_full_win98.ico",             # иконка полной корзины
+        "cursors_dir": r"D:\old master\cursor_now\win98_cur"                                                        # Папка, где лежат курсоры 98
     },
     "winXP": {
-        "wallpaper": r"D:\old master\bacground_now\bacground_now_winXP\winXP_wallpaper.png",
-        "sound_start": r"D:\old master\sounds_now\start_winXP.wav",
-        "icon_computer": r"D:\old master\icons_now\computer_winXP.ico",
-        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_winXP.ico",
-        "icon_trash_full": r"D:\old master\icons_now\trash_full_winXP.ico",
-        "cursors_dir": r"D:\old master\cursor_now\winXP_cur"
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_winXP\winXP_wallpaper.png",                        # рабочий стол
+        "sound_start": r"D:\old master\sounds_now\sounds_winXP\start_winXP\start_winXP.wav",                        # запуск winXP
+        "icon_computer": r"D:\old master\icons_now\computer_winXP.ico",                                             # иконка ПК
+        "icon_trash_empty": r"D:\old master\icons_now\icon_winXP\trash_empty_winXP\trash_empty_winXP.ico",          # иконка пустой корзины
+        "icon_trash_full": r"D:\old master\icons_now\icon_winXP\trash_full_winXP\trash_full_winXP.ico",             # иконка полной корзины
+        "cursors_dir": r"D:\old master\cursor_now\winXP_cur"                                                        # Папка, где лежат курсоры XP
     },
     "vista": {
-        "wallpaper": r"D:\old master\bacground_now\bacground_now_winVista\vista_wallpaper.png",
-        "sound_start": r"D:\old master\sounds_now\start_vista.wav",
-        "icon_computer": r"D:\old master\icons_now\computer_vista.ico",
-        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_vista.ico",
-        "icon_trash_full": r"D:\old master\icons_now\trash_full_vista.ico",
-        "cursors_dir": r"D:\old master\cursor_now\winVista_cur"
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_winVista\vista_wallpaper.png",                     # рабочий стол
+        "sound_start": r"D:\old master\sounds_now\sounds_winVista\start_winVista\start_winVista.wav",               # запуск winVista
+        "icon_computer": r"D:\old master\icons_now\icon_winVista\computer_winVista\computer_winVista.ico",          # иконка ПК
+        "icon_trash_empty": r"D:\old master\icons_now\icon_winVista\trash_empty_winVista\trash_empty_winVista.ico", # иконка пустой корзины
+        "icon_trash_full": r"D:\old master\icons_now\icon_winVista\trash_full_winVista\trash_full_winVista.ico",    # иконка полной корзины
+        "cursors_dir": r"D:\old master\cursor_now\winVista_cur"                                                     # Папка, где лежат курсоры Vista
     },
     "win7": {
-        "wallpaper": r"D:\old master\bacground_now\bacground_now_win7\win7_wallpaper.png",
-        "sound_start": r"D:\old master\sounds_now\start_win7.wav",
-        "icon_computer": r"D:\old master\icons_now\computer_win7.ico",
-        "icon_trash_empty": r"D:\old master\icons_now\trash_empty_win7.ico",
-        "icon_trash_full": r"D:\old master\icons_now\trash_full_win7.ico",
-        "cursors_dir": r"D:\old master\cursor_now\win7_cur"
+        "wallpaper": r"D:\old master\bacground_now\bacground_now_win7\win7_wallpaper.png",                          # рабочий стол
+        "sound_start": r"D:\old master\sounds_now\sounds_win7\start_win7\start_win7.wav",                           # запуск win7
+        "icon_computer": r"D:\old master\icons_now\icon_win7\computer_win7\computer_win7.ico",                      # иконка ПК
+        "icon_trash_empty": r"D:\old master\icons_now\icon_win7\trash_empty_win7\trash_empty_win7.ico",             # иконка пустой корзины
+        "icon_trash_full": r"D:\old master\icons_now\icon_win7\trash_full_win7\trash_full_win7.ico",                # иконка полной корзины
+        "cursors_dir": r"D:\old master\cursor_now\win7_cur"                                                         # Папка, где лежат курсоры 7
     },
     # Пути для отката к стандартной Windows 10
     "restore": {
-        "wallpaper": r"D:\old master\bacground_old\default_wallpaper.jpg", # Ваши старые дефолтные обои
-        "sound_close": r"D:\old master\sounds_now\close_win95.wav",
-        "cursors_old_dir": r"D:\old master\cursors_old",
-        "icons_old_dir": r"D:\old master\icons_old"
+        "wallpaper": r"D:\old master\bacground_old\default_wallpaper.jpg",                                          # дефолтные обои
+        "sound_close": r"D:\old master\sounds_now\sounds_win95\close_win95\close_win95.wav",                        # звук выхода 
+        "cursors_old_dir": r"D:\old master\cursors_old",                                                            # старый курсор
+        "icons_old_dir": r"D:\old master\icons_old"                                                                 # старые иконки
     }
 }
 
