@@ -1,7 +1,7 @@
 import os
 
 # --- Настройки графического интерфейса (Tkinter) ---
-WINDOW_TITLE = "old master"
+WINDOW_TITLE = "Retro master"
 WINDOW_GEOMETRY = "400x300"
 COLOR_BG_TEAL = "#008080"
 COLOR_BTN_BG = "#4FC7DB"
