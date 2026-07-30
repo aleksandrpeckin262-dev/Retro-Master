@@ -17,7 +17,13 @@ class GUE(tk.Tk):
         if os.path.exists(config.ICON_PATH): 
             self.iconbitmap(config.ICON_PATH)
         
+        # Переменная для Tkinter радио-кнопок
         self.selected_version = tk.StringVar(value="win95")
+        
+        # ХРАНИЛИЩЕ ТЕКУЩЕЙ ТЕМЫ: Запоминаем, какая тема РЕАЛЬНО активна в системе сейчас.
+        # По умолчанию при старте считаем, что это стандартная Windows 10 (None).
+        self.current_theme = None 
+        
         self.label_title = tk.Label(self, text="Select OS Theme:")
         self.label_title.place(x=20, y=20)
         
@@ -51,7 +57,6 @@ class GUE(tk.Tk):
         for button in self.all_btns: 
             button.configure(image="", compound="none")
             
-        # Смена GUI окна програмы
         if current_version == "win95": 
             app_bg, btn_bg, btn_act, btn_fg, font, text_c, relief, bd = config.COLOR_BG_TEAL, "#D4D0C8", "#B0B0B0", "#000000", ("MS Sans Serif", 11), "#FFFFFF", "raised", 3
         elif current_version == "win98": 
@@ -78,13 +83,11 @@ class GUE(tk.Tk):
         self.update_idletasks()
         
         def run_backend():
-            # Запускаем WinAPI в потоке, чтобы GUI Tkinter не фризился
             target_font = "MS Sans Serif" if target_version in ["win95", "win98"] else ("Tahoma" if target_version == "winXP" else "Segoe UI")
             self.os_manager.set_global_font_substitute(target_font)
             
             resource_pack = config.THEME_RESOURCES.get(target_version)
             
-            # Сброс старых ретро-эффектов
             self.os_manager.set_retro_taskbar_color(enable=False)
             self.os_manager.set_retro_colors_win32(version_name="default", enable=False)
             
@@ -93,7 +96,6 @@ class GUE(tk.Tk):
             self.os_manager.set_all_cursors_direct(resource_pack.get("cursors_dir"), is_reset=False)
             self.os_manager.set_system_icons_direct(resource_pack.get("icon_computer"), resource_pack.get("icon_trash_empty"), resource_pack.get("icon_trash_full"), is_reset=False)
             
-            # ClearType отключается для пиксельного текста
             self.os_manager.set_clear_type(enable=(target_version != "win95" and target_version != "win98"))
             
             if target_version in ["win95", "win98"]:
@@ -102,11 +104,13 @@ class GUE(tk.Tk):
                 if target_version == "win98": 
                     self.os_manager.set_explorer_click_sound_direct(resource_pack.get("sound_click"), enable=True)
             
-            # Броадкаст HWND_BROADCAST принудительно обновляет метрики во всех открытых окнах ОС
             ctypes.windll.user32.SendMessageW(config.HWND_BROADCAST, config.WM_SETTINGCHANGE, 0, "Registry::String")
-            time.sleep(0.8) # Пауза чтобы ОС успела перерисовать контейнеры до убийства проводника
+            time.sleep(0.8)
             
             self.os_manager.restart_shell()
+            
+            # УСПЕХ: Тема применилась, записываем её имя в память программы
+            self.current_theme = target_version
             
         threading.Thread(target=run_backend, daemon=True).start()
 
@@ -114,10 +118,22 @@ class GUE(tk.Tk):
         self.update_idletasks()
         
         def run_restore():
+            # 1. ДИНАМИЧЕСКИЙ ВЫЗОВ ЗВУКА: Ищем кастомный звук закрытия уходящей темы
+            sound_to_play = None
+            if self.current_theme:
+                # Заглядываем в конфиг той темы, которая включена ПРЯМО СЕЙЧАС
+                old_pack = config.THEME_RESOURCES.get(self.current_theme)
+                if old_pack:
+                    sound_to_play = old_pack.get("sound_close")
+            
+            # Воспроизводим найденный кастомный звук закрытия (если темы не было, будет тишина)
+            if sound_to_play:
+                self.os_manager.play_sound_direct(sound_to_play)
+                
             self.os_manager.set_global_font_substitute(None)
             resource_pack = config.THEME_RESOURCES["restore"]
             
-            self.os_manager.play_sound_direct(resource_pack.get("sound_close"))
+            # Удалена строчка жесткого проигрывания звука из секции "restore"
             self.os_manager.set_wallpaper(resource_pack.get("wallpaper"))
             self.os_manager.set_all_cursors_direct(resource_pack.get("cursors_old_dir"), is_reset=True)
             self.os_manager.set_clear_type(enable=True)
@@ -131,9 +147,11 @@ class GUE(tk.Tk):
             
             self.os_manager.restart_shell()
             
+            # Сбрасываем текущую тему обратно на дефолтную Windows 10
+            self.current_theme = None
+            
         threading.Thread(target=run_restore, daemon=True).start()
 
 if __name__ == "__main__":
     app = GUE()
     app.mainloop()
-
